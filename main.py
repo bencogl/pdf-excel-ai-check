@@ -3,6 +3,7 @@ from huggingface_hub import InferenceClient
 import pdfplumber
 from openpyxl import load_workbook
 import traceback
+from io import BytesIO
 
 app = FastAPI()
 
@@ -28,14 +29,14 @@ async def analizza_documenti(pdf: UploadFile = File(...), excel: UploadFile = Fi
                 else:
                     testo_pdf += "[Pagina vuota o non leggibile]\n"
 
-        # Estrazione dati dall'Excel
-        wb = load_workbook(excel.file, data_only=True)
+        # Corretto: carica l'Excel da BytesIO
+        wb = load_workbook(BytesIO(await excel.read()), data_only=True)
         foglio = wb.active
         dati_excel = []
         for riga in foglio.iter_rows(values_only=True):
             dati_excel.append(riga)
 
-        # Creazione del prompt per l'AI
+        # Prompt e analisi AI
         prompt_ai = f"""
         Dati estratti dal PDF:
         {testo_pdf}
@@ -45,13 +46,11 @@ async def analizza_documenti(pdf: UploadFile = File(...), excel: UploadFile = Fi
 
         Identifica chiaramente eventuali differenze, incongruenze o errori.
         """
-
-        # Chiamata all'API di HuggingFace
         risposta_ai = client.text_generation(prompt_ai, max_new_tokens=200)
         return {"Analisi effettuata da AI": risposta_ai}
 
     except Exception as e:
-        # Log dettagliato dell'errore
+        import traceback
         errore_dettagliato = traceback.format_exc()
         print(f"Errore interno: {errore_dettagliato}")
         raise HTTPException(status_code=500, detail=errore_dettagliato)
