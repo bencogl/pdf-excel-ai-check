@@ -7,7 +7,7 @@ from openpyxl import load_workbook
 app = FastAPI()
 
 # Sostituisci con il tuo HuggingFace Token personale
-HUGGINGFACE_TOKEN = "il-tuo-token-di-huggingface"
+HUGGINGFACE_TOKEN = "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"
 model_name = "meta-llama/Meta-Llama-3-8B-Instruct"
 
 client = InferenceClient(model=model_name, token=HUGGINGFACE_TOKEN)
