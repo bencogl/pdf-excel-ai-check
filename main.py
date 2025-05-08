@@ -1,6 +1,5 @@
  
-from fastapi import FastAPI, UploadFile, File
-from huggingface_hub import InferenceClient
+from fastapi import FastAPI, UploadFile, File, HTTPExceptionfrom huggingface_hub import InferenceClient
 import pdfplumber
 from openpyxl import load_workbook
 
