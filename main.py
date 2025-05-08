@@ -8,7 +8,7 @@ from io import BytesIO
 app = FastAPI()
 
 HUGGINGFACE_TOKEN = "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"
-model_name = "mistralai/Mistral-7B-Instruct-v0.1"
+model_name = "tiiuae/falcon-7b-instruct"
 
 client = InferenceClient(model=model_name, token=HUGGINGFACE_TOKEN)
 
