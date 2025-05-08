@@ -7,7 +7,7 @@ app = FastAPI()
 
 # Sostituisci con il tuo HuggingFace Token personale
 HUGGINGFACE_TOKEN = "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"
-odel_name = "tiiuae/falcon-7b-instruct"  # Modello aggiornato
+model_name = "tiiuae/falcon-7b-instruct"  # Modello aggiornato
 
 client = InferenceClient(model=model_name, token=HUGGINGFACE_TOKEN)
 
