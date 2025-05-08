@@ -1,16 +1,14 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from huggingface_hub import InferenceClient
+from transformers import pipeline
 import pdfplumber
 from openpyxl import load_workbook
-import traceback
 from io import BytesIO
+import traceback
 
 app = FastAPI()
 
-HUGGINGFACE_TOKEN = "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"
-model_name = "tiiuae/falcon-7b-instruct"
-
-client = InferenceClient(model=model_name, token=HUGGINGFACE_TOKEN)
+# Creazione della pipeline di text-generation
+generator = pipeline("text-generation", model="tiiuae/falcon-rw-1b")
 
 @app.get("/")
 def home():
@@ -29,14 +27,14 @@ async def analizza_documenti(pdf: UploadFile = File(...), excel: UploadFile = Fi
                 else:
                     testo_pdf += "[Pagina vuota o non leggibile]\n"
 
-        # Corretto: carica l'Excel da BytesIO
+        # Caricamento dell'Excel
         wb = load_workbook(BytesIO(await excel.read()), data_only=True)
         foglio = wb.active
         dati_excel = []
         for riga in foglio.iter_rows(values_only=True):
             dati_excel.append(riga)
 
-        # Prompt e analisi AI
+        # Creazione del prompt per l'AI
         prompt_ai = f"""
         Dati estratti dal PDF:
         {testo_pdf}
@@ -46,11 +44,14 @@ async def analizza_documenti(pdf: UploadFile = File(...), excel: UploadFile = Fi
 
         Identifica chiaramente eventuali differenze, incongruenze o errori.
         """
-        risposta_ai = client.text_generation(prompt_ai, max_new_tokens=200)
+
+        # Generazione del testo
+        output = generator(prompt_ai, max_new_tokens=200)
+        risposta_ai = output[0]["generated_text"]
+
         return {"Analisi effettuata da AI": risposta_ai}
 
     except Exception as e:
-        import traceback
         errore_dettagliato = traceback.format_exc()
         print(f"Errore interno: {errore_dettagliato}")
         raise HTTPException(status_code=500, detail=errore_dettagliato)
